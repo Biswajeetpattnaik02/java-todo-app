@@ -1,0 +1,58 @@
+name: Terraform Manual Apply/Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'apply'
+        options:
+          - apply
+          - destroy
+      confirm:
+        description: 'Type "yes" to confirm the action'
+        required: true
+        default: 'no'
+
+jobs:
+  manual:
+    name: Manual Terraform
+    runs-on: ubuntu-latest
+    env:
+      TF_ROOT: terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform init -upgrade
+
+      - name: Terraform fmt
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform validate
+
+      - name: Terraform apply
+        if: ${{ github.event.inputs.action == 'apply' && github.event.inputs.confirm == 'yes' }}
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform apply -auto-approve
+
+      - name: Terraform destroy
+        if: ${{ github.event.inputs.action == 'destroy' && github.event.inputs.confirm == 'yes' }}
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform destroy -auto-approve

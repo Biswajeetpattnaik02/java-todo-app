@@ -1,0 +1,28 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.backup
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+terraform.tfvars
+terraform.tfvars.json
+*.tfvars.local
+
+# CLI configs
+.terraformrc
+terraform.rc
+
+# Sensitive keys
+*.pem
+*.key
+
+# IDEs and editors
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
